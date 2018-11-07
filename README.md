@@ -1,5 +1,6 @@
-# lane-detection
-Lane detection(주행영상 차선검출 프로그램) C++ / opencv / 
+# simple lane-detection
+Simple lane detection(간단한 주행영상 차선검출 프로그램) C++ / opencv / 
+
 ### 사용 환경
 - windows10
 - opencv3.1.0
