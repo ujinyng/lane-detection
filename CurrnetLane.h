@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _CurrnetLane_H_
-#define _CurrnetLane_H_
+#ifndef _CurrentLane_H_
+#define _CurrentLane_H_
 #include <iostream>
 #include "opencv2/opencv.hpp"
 using namespace cv;
