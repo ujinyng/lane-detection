@@ -1,6 +1,6 @@
 #include <iostream>
 #include "opencv2/opencv.hpp"
-#include "CurrnetLane.h"
+#include "CurrentLane.h"
 #include "CLine.h"
 #include "LaneDetect.h"
 
@@ -11,13 +11,13 @@ using namespace cv;
 using namespace std;
 
 Mat LaneDetect::preprocessing(Mat frame, Rect roi, Rect roileft, Rect roiright) {
-	/*ÀüÃ³¸®*/
+	/*ì „ì²˜ë¦¬*/
 	Mat	grayImage, otsuImage, closedImage, blurImage;
 
-	cvtColor(frame, grayImage, COLOR_BGR2GRAY);	//±×·¹ÀÌ½ºÄÉÀÏ·Î º¯È¯
-	adaptiveThreshold(grayImage, otsuImage, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 81, -50);//ÀûÀÀÇüthreshold
-	Mat morphfillter(4, 4, CV_8U, Scalar(1)); //¿¬»êÇÊÅÍ
-	morphologyEx(otsuImage, closedImage, MORPH_CLOSE, morphfillter);	//Å¬·ÎÂ¡¿¬»ê					
+	cvtColor(frame, grayImage, COLOR_BGR2GRAY);	//ê·¸ë ˆì´ìŠ¤ì¼€ì¼ë¡œ ë³€í™˜
+	adaptiveThreshold(grayImage, otsuImage, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 81, -50);//ì ì‘í˜•threshold
+	Mat morphfillter(4, 4, CV_8U, Scalar(1)); //ì—°ì‚°í•„í„°
+	morphologyEx(otsuImage, closedImage, MORPH_CLOSE, morphfillter);	//í´ë¡œì§•ì—°ì‚°					
 	medianBlur(closedImage, blurImage, 3);
 
 	return blurImage;
@@ -28,18 +28,18 @@ int LaneDetect::extractLine(CLine * lines, int num_labels, Mat src_img, Mat img_
 	int line_index = 0;
 
 	vector<Vec4i> blob_lines;
-	// Labelled image blobÀ» ¸ğµÎ Ã¼Å© (i=0ÀÎ °æ¿ì´Â ¹è°æÀÌ¹Ç·Î Á¦¿Ü)
+	// Labelled image blobì„ ëª¨ë‘ ì²´í¬ (i=0ì¸ ê²½ìš°ëŠ” ë°°ê²½ì´ë¯€ë¡œ ì œì™¸)
 	for (int i = 1; i < num_labels; i++)
 	{
-		// blob area°¡ ³Ê¹« ÀÛÀ¸¸é ¹«½Ã
+		// blob areaê°€ ë„ˆë¬´ ì‘ìœ¼ë©´ ë¬´ì‹œ
 		if (stats.at<int>(i, CC_STAT_AREA) < MIN_AREA_PIXELS) continue;
-		// Houghtrasform ÈÄ line Á¶°¢ ÃßÃâ,
-		//lineÀ» ÇÏ³ªµµ ÃßÃâ ¸øÇßÀ» °æ¿ì ÀÌÈÄ¸¦ ¹«½ÃÇÏ°í ´ÙÀ½ blobÀ¸·Î ³Ñ¾î°£´Ù
+		// Houghtrasform í›„ line ì¡°ê° ì¶”ì¶œ,
+		//lineì„ í•˜ë‚˜ë„ ì¶”ì¶œ ëª»í–ˆì„ ê²½ìš° ì´í›„ë¥¼ ë¬´ì‹œí•˜ê³  ë‹¤ìŒ blobìœ¼ë¡œ ë„˜ì–´ê°„ë‹¤
 		HoughLinesP(src_img, blob_lines, 1, CV_PI / 180, 100, 100, 2);
 
 		if (blob_lines.size() == 0) continue;
 
-		// Transform ÈÄ ÃßÃâµÈ line Á¶°¢ Áß¿¡ °¡Àå ±ä lineÀ» Ã£´Â´Ù
+		// Transform í›„ ì¶”ì¶œëœ line ì¡°ê° ì¤‘ì— ê°€ì¥ ê¸´ lineì„ ì°¾ëŠ”ë‹¤
 		double longDistance = 0;
 		int longDistanceIndex = 0;
 		for (int j = 0; j < blob_lines.size(); j++)
@@ -52,17 +52,17 @@ int LaneDetect::extractLine(CLine * lines, int num_labels, Mat src_img, Mat img_
 			}
 		}
 
-		// °¡Àå ±ä line Á¶°¢ÀÇ ±â¿ï±â¸¦ ÀÌ¿ëÇØ ÀÌ¹ÌÁö blobÀÇ center¸¦ ±âÁØÀ¸·Î »õ·Î¿î line »ı¼º
+		// ê°€ì¥ ê¸´ line ì¡°ê°ì˜ ê¸°ìš¸ê¸°ë¥¼ ì´ìš©í•´ ì´ë¯¸ì§€ blobì˜ centerë¥¼ ê¸°ì¤€ìœ¼ë¡œ ìƒˆë¡œìš´ line ìƒì„±
 		Vec4i L = blob_lines[longDistanceIndex];
-		double rate = ((double)(L[3] - L[1])) / ((double)(L[2] - L[0]) + 0.5); // ºĞ¸ğ°¡ 0ÀÌ µÇ´Â °æ¿ì(¹«ÇÑ´ë ±â¿ï±â)¸¦ ¸·±â À§ÇØ ºĞ¸ğ¿¡ 0.5¸¦ ´õÇØÁØ´Ù
+		double rate = ((double)(L[3] - L[1])) / ((double)(L[2] - L[0]) + 0.5); // ë¶„ëª¨ê°€ 0ì´ ë˜ëŠ” ê²½ìš°(ë¬´í•œëŒ€ ê¸°ìš¸ê¸°)ë¥¼ ë§‰ê¸° ìœ„í•´ ë¶„ëª¨ì— 0.5ë¥¼ ë”í•´ì¤€ë‹¤
 		int unique_line_flag = 1;
 
-		// ÀÌ¹Ì »ı¼ºÇÑ line°ú Áßº¹µÇ´Â(³Ê¹« °¡±î¿î) lineÀº »õ·Î »ı¼ºÇÏÁö ¾Ê´Â´Ù 
+		// ì´ë¯¸ ìƒì„±í•œ lineê³¼ ì¤‘ë³µë˜ëŠ”(ë„ˆë¬´ ê°€ê¹Œìš´) lineì€ ìƒˆë¡œ ìƒì„±í•˜ì§€ ì•ŠëŠ”ë‹¤ 
 		for (int k = 0; k < line_index; k++) {
 			if (lines[k].dist_to_point(Point(L[0], L[1])) < LINE_SPACING_PIXELS) unique_line_flag = 0;
 		}
 
-		// »õ·Î¿î lineÀÎ °æ¿ì »ı¼ºÇÏ¿© lines ¸Ş¸ğ¸® ¿µ¿ª¿¡ ÀúÀå
+		// ìƒˆë¡œìš´ lineì¸ ê²½ìš° ìƒì„±í•˜ì—¬ lines ë©”ëª¨ë¦¬ ì˜ì—­ì— ì €ì¥
 		if (unique_line_flag) {
 			double centerx = centroids.at<double>(i, 0);
 			double centery = centroids.at<double>(i, 1);
@@ -72,15 +72,15 @@ int LaneDetect::extractLine(CLine * lines, int num_labels, Mat src_img, Mat img_
 			line_index++;
 		}
 	}
-	// »ı¼ºÇÑ line °³¼ö¸¦ ¹İÈ¯
+	// ìƒì„±í•œ line ê°œìˆ˜ë¥¼ ë°˜í™˜
 	return line_index;
 }
 void LaneDetect::displayLineinfo(Mat img, CLine * lines, int num_lines, Scalar linecolor, Scalar captioncolor, int width, int height) {
 	for (int i = 0; i < num_lines; i++) {
 		double x1, x2, y1, y2;
 
-		/*img°¡ ÀüÃ¼ frameÀÌ±â ¶§¹®¿¡ width, heightÀ» ´õÇØÁÜ
-		roiframeÀÌ¶ó¸é ´õÇØÁÙ ÇÊ¿ä ¾øÀ½*/
+		/*imgê°€ ì „ì²´ frameì´ê¸° ë•Œë¬¸ì— width, heightì„ ë”í•´ì¤Œ
+		roiframeì´ë¼ë©´ ë”í•´ì¤„ í•„ìš” ì—†ìŒ*/
 		x1 = lines[i].left;
 		x2 = lines[i].left + lines[i].width;
 		y1 = lines[i].rate * x1 + lines[i].y_inter;
@@ -200,7 +200,7 @@ void LaneDetect::currentLane(Mat& image, double* angle, Point &curv, Point &curx
 			X[i] = Point(lines_L[i].start.x, lines_L[i].start.y);
 			Y[i] = Point(lines_R[i].end.x + image.cols / 2, lines_R[i].end.y);
 
-			//°¢°¢ ¿ŞÂÊ,¿À¸¥ÂÊ¿µ¿ª¾È¿¡ ÀÖÀ¸¸é ÁøÇà
+			//ê°ê° ì™¼ìª½,ì˜¤ë¥¸ìª½ì˜ì—­ì•ˆì— ìˆìœ¼ë©´ ì§„í–‰
 			if ((X[i].x >= 0 && X[i].x <= image.cols / 2) && (Y[i].x > image.cols / 2 && Y[i].x <= image.cols))
 			{
 
