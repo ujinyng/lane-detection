@@ -1,6 +1,6 @@
 #include <iostream>
 #include "opencv2/opencv.hpp"
-#include "CurrnetLane.h"
+#include "CurrentLane.h"
 #include "CLine.h"
 #include "LaneDetect.h"
 
@@ -24,7 +24,7 @@ int main()
 		return 0;
 	}
 
-	/*¿ø¿µ»óÀÇ Å©±â*/
+	/*ì›ì˜ìƒì˜ í¬ê¸°*/
 	int width, height;
 	width = (int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
 	height = (int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -32,20 +32,20 @@ int main()
 
 	cout << "size: " << size << endl;
 
-	/*¿ø¿µ»óÀÇ fps(ÃÊ´ç ÇÁ·¹ÀÓ¼ö)*/
+	/*ì›ì˜ìƒì˜ fps(ì´ˆë‹¹ í”„ë ˆì„ìˆ˜)*/
 	int fps = (int)(capture.get(CV_CAP_PROP_FPS));
 
 	cout << "fps: " << fps << endl;
 
 	int frameNum = -1;
 	Mat frame, roiframe, roiframe_L, roiframe_R;
-	int roi_x = 0, roi_y = height / 3; //°ü½É¿µ¿ª ½ÃÀÛÁ¡ÀÇ ÁÂÇ¥ x,y
+	int roi_x = 0, roi_y = height / 3; //ê´€ì‹¬ì˜ì—­ ì‹œì‘ì ì˜ ì¢Œí‘œ x,y
 									   //width = 1280;
 									   //height = 720/2=340;
-									   /*À§¿¡¼­ 1/3ÁöÁ¡ºÎÅÍ ¾Æ·¡ 1/2ÀÇ ¿µ¿ªÀ» ROI·Î ¼³Á¤*/
+									   /*ìœ„ì—ì„œ 1/3ì§€ì ë¶€í„° ì•„ë˜ 1/2ì˜ ì˜ì—­ì„ ROIë¡œ ì„¤ì •*/
 
-	/*°ü½É¿µ¿ª Á¤ÀÇ*/
-	//Parameter: ½ÃÀÛÁ¡ÀÇ(x,y), °ü½É¿µ¿ªÀÇ Å©±â
+	/*ê´€ì‹¬ì˜ì—­ ì •ì˜*/
+	//Parameter: ì‹œì‘ì ì˜(x,y), ê´€ì‹¬ì˜ì—­ì˜ í¬ê¸°
 	Rect roi(roi_x, roi_y, width, height / 2);
 	Rect roileft(roi_x, roi_y, width / 2, height / 2);
 	Rect roiright((width - roi_x) / 2, roi_y, width / 2, height / 2);
@@ -64,46 +64,46 @@ int main()
 			break;
 		cout << "Detect CurrentLane..." << endl;
 
-		/*°ü½É¿µ¿ª ¼³Á¤*/
+		/*ê´€ì‹¬ì˜ì—­ ì„¤ì •*/
 		roiframe = frame(roi);
 		roiframe_L = frame(roileft);
 		roiframe_R = frame(roiright);
 
 		Mat preImage, edgeImage;
-		/*ÀüÃ³¸®*/
+		/*ì „ì²˜ë¦¬*/
 		preImage = lanedetect.preprocessing(frame, roi, roileft, roiright);
 		Canny(preImage, edgeImage, 100, 210, 3);
 
-		/*¿§ÁöÀÌ¹ÌÁö ¿µ¿ª¼³Á¤*/
+		/*ì—£ì§€ì´ë¯¸ì§€ ì˜ì—­ì„¤ì •*/
 		Mat roiEdge_R, roiEdge_L;
 		roiEdge_R = edgeImage(roiright);
 		roiEdge_L = edgeImage(roileft);
 
-		/*ÁÂ¿ì¿µ¿ªÀ» ¶óº§¸µ*/
-		//¶óº§¸µ¿¡ ÇÊ¿äÇÑ º¯¼ö
+		/*ì¢Œìš°ì˜ì—­ì„ ë¼ë²¨ë§*/
+		//ë¼ë²¨ë§ì— í•„ìš”í•œ ë³€ìˆ˜
 		Mat img_labels_R, stats_R, centroids_R;
 		Mat img_labels_L, stats_L, centroids_L;
 
-		/*ÁÂ¿ì Labelled ¿µ¿ªÀÇ °³¼ö*/
+		/*ì¢Œìš° Labelled ì˜ì—­ì˜ ê°œìˆ˜*/
 		int numOfLabels_R = connectedComponentsWithStats(roiEdge_R, img_labels_R, stats_R, centroids_R, 8, CV_32S);
 		int numOfLabels_L = connectedComponentsWithStats(roiEdge_L, img_labels_L, stats_L, centroids_L, 8, CV_32S);
 
-		// Labelled ¿µ¿ª¿¡¼­ Á÷¼±À» ÃßÃâÇØ ÀúÀåÇÏ±â À§ÇÑ ¸Ş¸ğ¸® ÇÒ´ç (ÃÖ´ë label °³¼ö¸¸Å­)		
+		// Labelled ì˜ì—­ì—ì„œ ì§ì„ ì„ ì¶”ì¶œí•´ ì €ì¥í•˜ê¸° ìœ„í•œ ë©”ëª¨ë¦¬ í• ë‹¹ (ìµœëŒ€ label ê°œìˆ˜ë§Œí¼)		
 		CLine* lines_R = (CLine *)malloc(sizeof(CLine)*numOfLabels_R);
 		CLine* lines_L = (CLine *)malloc(sizeof(CLine)*numOfLabels_L);
 
-		/*Labelled ¿µ¿ª¿¡¼­ Á÷¼± ÃßÃâ*/
+		/*Labelled ì˜ì—­ì—ì„œ ì§ì„  ì¶”ì¶œ*/
 		int right_lines = lanedetect.extractLine(lines_R, numOfLabels_R, roiEdge_R, img_labels_R, stats_R, centroids_R);
 		int left_lines = lanedetect.extractLine(lines_L, numOfLabels_L, roiEdge_L, img_labels_L, stats_L, centroids_L);
 
 
 		lanedetect.currentLane(roiframe, &smallA, crv, crx, cry, lines_R, lines_L, right_lines, left_lines, &check);
 
-		//µ¿ÀûÇÒ´ç ¸Ş¸ğ¸® ÇØÁ¦
+		//ë™ì í• ë‹¹ ë©”ëª¨ë¦¬ í•´ì œ
 		free(lines_R);
 		free(lines_L);
 
-		/*ÇöÀç Â÷¼± Ç¥½Ã*/
+		/*í˜„ì¬ ì°¨ì„  í‘œì‹œ*/
 		if (check >= 0) {
 			vector<Point> Lane;
 			vector<Point> fillLane;
@@ -132,7 +132,7 @@ int main()
 			addWeighted(roiframe, 0.7, curlane, 0.2, 0.0, roiframe);
 		}
 
-		/*½ÇÇà Ã¢*/
+		/*ì‹¤í–‰ ì°½*/
 		namedWindow("frame", 0);
 		imshow("frame", frame);
 
