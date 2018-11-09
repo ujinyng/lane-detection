@@ -1,6 +1,11 @@
 # simple lane-detection
 Simple lane detection(간단한 주행영상 차선검출 프로그램) C++ / opencv / 
 
+### 프로젝트내용
+- 졸업작품 프로젝트로 진행했던 내용
+- 졸업작품 전시회 장려상
+- 교내 논문집, 국내 학회, 해외 논문 발표
+
 ### 사용 환경
 - windows10
 - opencv3.1.0
